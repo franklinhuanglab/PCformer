@@ -1,0 +1,20 @@
+# Jupyter autosaves
+.ipynb_checkpoints/
+
+# Python bytecode / caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS / editor noise
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# RStudio session files
+.Rproj.user/
+.Rhistory
+.RData
