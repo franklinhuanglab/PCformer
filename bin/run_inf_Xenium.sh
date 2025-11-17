@@ -12,26 +12,28 @@
 # =============================================================================
 PROJECT_ROOT="$(dirname "$(dirname "$(realpath "$0")")")"
 cd "$PROJECT_ROOT"
-
-# USER MODIFIED VARIABLES
 TOTAL_CPUS=$(nproc --all)
+
+# ========================================================================================
+# USER MODIFIED VARIABLES
 CPUS=8  # Or: $((TOTAL_CPUS - 2)); Wynton: $NSLOTS
 
-MODALITY="Xenium"
-MATRIX_FILE="Xenium_AA_5pct_matrix.csv.gz"
-MODEL_NAME="xenium_aa_5pct"
-METADATA="Xenium_AA_5pct_metadata.csv"
-GENES="gene_names_xenium.txt"
+MODALITY="Xenium"                          # <- MODIFY
+MATRIX_FILE="Xenium_AA_5pct_matrix.csv.gz" # <- MODIFY
+MODEL_NAME="xenium_aa_5pct"                # <- MODIFY; change for multiple versions
+METADATA="Xenium_AA_5pct_metadata.csv"     # <- MODIFY
+GENES="gene_names_xenium.txt"              # <- MODIFY
 STAGE="inference"
-EMBED_DIM=1024          # Options: 512 1024 2048
+EMBED_DIM=1024    # Options: 512 1024 2048
 
 INPUT_DIR="${PROJECT_ROOT}/data/${MODALITY}"
 CACHE_DIR="${PROJECT_ROOT}/cache"
 CONFIG_FILE="${PROJECT_ROOT}/config.yaml"
 
 LABELS="${INPUT_DIR}/${METADATA}"
-TRUE_LABELS="${LABELS}" # Options: "${LABELS}" "NULL"
-BARCODES="${CACHE_DIR}/finetune/${MODEL_NAME}/metadata/inference_barcodes.txt" # "NULL" 
+TRUE_LABELS="${LABELS}"                    # <- MODIFY; Options: "${LABELS}" or "NULL"
+BARCODES="${CACHE_DIR}/finetune/${MODEL_NAME}/metadata/inference_barcodes.txt"
+# ^ MODIFY; Options: cache finetune inference_barcodes.txt dir or "NULL" 
 
 echo "${TRUE_LABELS}, ${BARCODES}"
 
@@ -41,15 +43,14 @@ MODEL="${PROJECT_ROOT}/model_weights/finetune/${MODEL_NAME}_embed_${EMBED_DIM}/$
 DATA_MATRIX="${INPUT_DIR}/${MATRIX_FILE}"
 DATASET_NAME=$(basename "$DATA_MATRIX" ".csv.gz")
 
-CACHE_PREFIX="${CACHE_DIR}/finetune/${MODEL_NAME}_embed_${EMBED_DIM}"   # $(date +%Y%m%d_%H%M%S)"
+CACHE_PREFIX="${CACHE_DIR}/${STAGE}/${MODEL_NAME}_embed_${EMBED_DIM}"   # $(date +%Y%m%d_%H%M%S)"
 OUTPUT_DIR="${PROJECT_ROOT}/results/${MODEL_NAME}/${DATASET_NAME}_${EMBED_DIM}_${STAGE}"
-OUTPUT_PREFIX="${OUTPUT_DIR}/${STAGE}_${DATASET_NAME}"
+OUTPUT_PREFIX="${OUTPUT_DIR}/${DATASET_NAME}_${STAGE}"
 
 
-# CPU Setup
+# ========================================================================================
+# CPU/GPU Setup
 print_cpu_info() {
-    TOTAL_CPUS=$(nproc --all)
-    CPUS=16  # Or: $((TOTAL_CPUS - 2)); Or: $NSLOTS
     echo "Detected ${TOTAL_CPUS} CPU(s) — using ${CPUS}"
 }
 # GPU Setup (minimal)
@@ -84,7 +85,7 @@ disable_huggingface_cache() {
 
 prepare_directories() {
     echo "Creating output and cache directories..."
-    mkdir -p "${CACHE_DIR}"
+    #mkdir -p "${CACHE_DIR}"
     mkdir -p "${OUTPUT_DIR}"
 }
 
