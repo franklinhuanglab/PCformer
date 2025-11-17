@@ -18,11 +18,11 @@ TOTAL_CPUS=$(nproc --all)
 # USER MODIFIED VARIABLES
 CPUS=8  # Or: $((TOTAL_CPUS - 2)); Wynton: $NSLOTS
 
-MODALITY="Xenium"                          # <- MODIFY
-MATRIX_FILE="Xenium_AA_5pct_matrix.csv.gz" # <- MODIFY
-MODEL_NAME="xenium_aa_5pct"                # <- MODIFY; change for multiple versions
-METADATA="Xenium_AA_5pct_metadata.csv"     # <- MODIFY
-GENES="gene_names_xenium.txt"              # <- MODIFY
+MODALITY="Xenium"                          # MODIFY. Where the input files live in `data`
+MATRIX_FILE="Xenium_EA_matrix.csv.gz"      # MODIFY. Input expression matrix
+MODEL_NAME="xenium_aa"                     # MODIFY. Name of the fine-tuned model
+METADATA="Xenium_AA_metadata.csv"          # MODIFY. Contains the model labels (not from new dataset)
+GENES="gene_names_xenium.txt"              # MODIFY
 STAGE="inference"
 EMBED_DIM=1024    # Options: 512 1024 2048
 
@@ -31,9 +31,10 @@ CACHE_DIR="${PROJECT_ROOT}/cache"
 CONFIG_FILE="${PROJECT_ROOT}/config.yaml"
 
 LABELS="${INPUT_DIR}/${METADATA}"
-TRUE_LABELS="${LABELS}"                    # <- MODIFY; Options: "${LABELS}" or "NULL"
-BARCODES="${CACHE_DIR}/finetune/${MODEL_NAME}/metadata/inference_barcodes.txt"
-# ^ MODIFY; Options: cache finetune inference_barcodes.txt dir or "NULL" 
+TRUE_LABELS="NULL"                    # MODIFY; Options: "${LABELS}" or "NULL"
+BARCODES="NULL"                       # MODIFY; cache hold-out barcodes or "NULL"
+#BARCODES="${CACHE_DIR}/finetune/${MODEL_NAME}/metadata/inference_barcodes.txt"
+
 
 echo "${TRUE_LABELS}, ${BARCODES}"
 
