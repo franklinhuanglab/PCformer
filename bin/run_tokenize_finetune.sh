@@ -8,21 +8,21 @@
 ##$ -l h_rt=14:00:00
 ##$ -m ea
 # ========================================================================================
-# Pre-process the a corpus dataset before running fine-tuning.
+# Pre-process a corpus dataset before running fine-tuning.
 # Performs train/test split, gene tokenization, token ranking.
 # ========================================================================================
 PROJECT_ROOT="$(dirname "$(dirname "$(realpath "$0")")")"
 cd "$PROJECT_ROOT"
+TOTAL_CPUS=$(nproc --all)
 
 # ========================================================================================
 # USER MODIFIED VARIABLES
-TOTAL_CPUS=$(nproc --all)
 CPUS=16  # Or: $((TOTAL_CPUS - 2)); Wynton: $NSLOTS
 
 MODALITY="Xenium"
-MATRIX_FILE="Xenium_EA_matrix.csv.gz"
-MODEL_NAME="xenium_aa"
-METADATA="Xenium_AA_metadata.csv"
+MATRIX_FILE="Xenium_AA_5pct_matrix.csv.gz"
+MODEL_NAME="xenium_aa_5pct"
+METADATA="Xenium_AA_5pct_metadata.csv"
 GENES="gene_names_xenium.txt"
 STAGE="finetune"
 EMBED_DIM=1024          # Options: 512 1024 2048

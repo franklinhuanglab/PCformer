@@ -13,16 +13,16 @@
 # =============================================================================
 PROJECT_ROOT="$(dirname "$(dirname "$(realpath "$0")")")"
 cd "$PROJECT_ROOT"
+TOTAL_CPUS=$(nproc --all)
 
 # ========================================================================================
 # USER MODIFIED VARIABLES
-TOTAL_CPUS=$(nproc --all)
 CPUS=2  # Or: $((TOTAL_CPUS - 2)); Wynton: $NSLOTS
 
 MODALITY="Xenium"
-MATRIX_FILE="Xenium_EA_matrix.csv.gz"
-MODEL_NAME="xenium_aa"
-METADATA="Xenium_AA_metadata.csv"
+MATRIX_FILE="Xenium_AA_5pct_matrix.csv.gz"
+MODEL_NAME="xenium_aa_5pct"
+METADATA="Xenium_AA_5pct_metadata.csv"
 GENES="gene_names_xenium.txt"
 STAGE="finetune"
 FOUNDATION="pretrain"
@@ -90,13 +90,13 @@ prepare_directories() {
 
 show_inputs_summary() {
     echo "================================"
-    echo " MODEL:          $MODEL"
+    echo " MODEL:          $MODEL_NAME"
     echo " EMBED_DIM:      $EMBED_DIM"
     echo " DATA MATRIX:    $DATA_MATRIX"
     echo " CACHE PREFIX:   $CACHE_PREFIX"
     echo " OUTPUT DIR:     $OUTPUT"
     echo "================================"
-    echo "TRUE_LABELS=${TRUE_LABELS}, BARCODES=${BARCODES}"
+    #echo "TRUE_LABELS=${TRUE_LABELS}, BARCODES=${BARCODES}"
 }
 
 show_inputs_summary

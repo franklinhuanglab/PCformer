@@ -13,14 +13,14 @@
 # ========================================================================================
 PROJECT_ROOT="$(dirname "$(dirname "$(realpath "$0")")")"
 cd "$PROJECT_ROOT"
+TOTAL_CPUS=$(nproc --all)
 
 # ========================================================================================
 # USER MODIFIED VARIABLES
-TOTAL_CPUS=$(nproc --all)
 CPUS=16  # Or: $((TOTAL_CPUS - 2)); Wynton: $NSLOTS
 
 MODALITY="Xenium"
-MATRIX_FILE="Xenium_EA_matrix.csv.gz"
+MATRIX_FILE="Xenium_AA_matrix.csv.gz"
 MODEL_NAME="xenium_aa"
 METADATA="Xenium_AA_metadata.csv"
 GENES="gene_names_xenium.txt"
