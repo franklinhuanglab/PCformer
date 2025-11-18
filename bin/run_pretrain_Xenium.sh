@@ -14,8 +14,8 @@
 PROJECT_ROOT="$(dirname "$(dirname "$(realpath "$0")")")"
 cd "$PROJECT_ROOT"
 
+# ========================================================================================
 # USER MODIFIED VARIABLES
-# -----------------------
 TOTAL_CPUS=$(nproc --all)
 CPUS=2  # Or: $((TOTAL_CPUS - 2)); Wynton: $NSLOTS
 
@@ -35,7 +35,7 @@ CONFIG_FILE="${PROJECT_ROOT}/config.yaml"
 DATA_MATRIX="${INPUT_DIR}/${MATRIX_FILE}"
 GENE_NAMES_FILE="${INPUT_DIR}/${GENES}"
 CACHE_PREFIX="${CACHE_DIR}/${STAGE}/${MODEL_NAME}" # _embed_${EMBED_DIM}"   # $(date +%Y%m%d_%H%M%S)"
-OUTPUT="$PROJECT_ROOT/model_weights/${STAGE}/${MODEL_NAME}_embed_${EMBED_DIM}/${MODEL_NAME}_${EMBED_DIM}_ranked_model"           # Script adds `.pt` to weights file
+OUTPUT="$PROJECT_ROOT/model_weights/${STAGE}/${MODEL_NAME}/embed_${EMBED_DIM}/${MODEL_NAME}_${EMBED_DIM}_ranked_model"           # Script adds `.pt` to weights file
 
 
 # ========================================================================================
@@ -66,7 +66,6 @@ print_gpu_info() {
 
 setup_environment() {
     echo "Activating virtual environment..."
-    # Choose to activate conda or venv, and cuda version
     #conda activate pt
     #module load cuda/11.8
     #module load cuda/12.2

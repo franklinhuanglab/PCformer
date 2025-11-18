@@ -18,3 +18,4 @@ __pycache__/
 .Rproj.user/
 .Rhistory
 .RData
+onstart.sh

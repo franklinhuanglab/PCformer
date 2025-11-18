@@ -14,15 +14,15 @@
 PROJECT_ROOT="$(dirname "$(dirname "$(realpath "$0")")")"
 cd "$PROJECT_ROOT"
 
+# ========================================================================================
 # USER MODIFIED VARIABLES
-# -----------------------
 TOTAL_CPUS=$(nproc --all)
 CPUS=2  # Or: $((TOTAL_CPUS - 2)); Wynton: $NSLOTS
 
 MODALITY="Xenium"
-MATRIX_FILE="Xenium_AA_5pct_matrix.csv.gz"
-MODEL_NAME="xenium_aa_5pct"
-METADATA="Xenium_AA_5pct_metadata.csv"
+MATRIX_FILE="Xenium_EA_matrix.csv.gz"
+MODEL_NAME="xenium_aa"
+METADATA="Xenium_AA_metadata.csv"
 GENES="gene_names_xenium.txt"
 STAGE="finetune"
 FOUNDATION="pretrain"
@@ -36,9 +36,9 @@ CONFIG_FILE="${PROJECT_ROOT}/config.yaml"
 
 DATA_MATRIX="${INPUT_DIR}/${MATRIX_FILE}"
 GENE_NAMES_FILE="${INPUT_DIR}/${GENES}"
-MODEL_PT="${PROJECT_ROOT}/model_weights/${FOUNDATION}/${MODEL_NAME}_embed_${EMBED_DIM}/${MODEL_NAME}_${EMBED_DIM}_ranked_model.pt"
+MODEL_PT="${PROJECT_ROOT}/model_weights/${FOUNDATION}/${MODEL_NAME}/embed_${EMBED_DIM}/${MODEL_NAME}_${EMBED_DIM}_ranked_model.pt"
 CACHE_PREFIX="${CACHE_DIR}/${STAGE}/${MODEL_NAME}" # _embed_${EMBED_DIM}"   # $(date +%Y%m%d_%H%M%S)"
-OUTPUT="${PROJECT_ROOT}/model_weights/${STAGE}/${MODEL_NAME}_embed_${EMBED_DIM}/${MODEL_NAME}_${EMBED_DIM}_finetuned"           # Script adds `.pt` to weights file
+OUTPUT="${PROJECT_ROOT}/model_weights/${STAGE}/${MODEL_NAME}/embed_${EMBED_DIM}/${MODEL_NAME}_${EMBED_DIM}_finetuned"           # Script adds `.pt` to weights file
 
 
 # ========================================================================================
@@ -51,7 +51,6 @@ print_cpu_info() {
 print_gpu_info() {
   if command -v nvidia-smi >/dev/null 2>&1; then
     echo "GPU(s):"
-    # Query only fields supported broadly
     nvidia-smi --query-gpu=name,memory.total,driver_version \
                --format=csv,noheader 2>/dev/null || nvidia-smi
     cuda_ver=$(nvidia-smi 2>/dev/null | sed -n 's/.*CUDA Version: \([0-9.]\+\).*/\1/p' | head -n1)
@@ -70,7 +69,6 @@ print_gpu_info() {
 
 setup_environment() {
     echo "Activating virtual environment..."
-    # Choose to activate conda or venv, and cuda version
     #conda activate pt
     #module load cuda/11.8
     #module load cuda/12.2
@@ -112,7 +110,7 @@ prepare_directories
 # ========================================================================================
 # RUN THE SCRIPT
 
-# Forces CUDA to run synchronously for easier debugging
+# Forces CUDA to run synchronously for debugging
 # CUDA_LAUNCH_BLOCKING=1 
 python -m src.training.finetune \
     "${DATA_MATRIX}" \

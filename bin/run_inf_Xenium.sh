@@ -4,6 +4,7 @@
 #$ -cwd
 #$ -j y
 #$ -pe smp 8
+#$ -q gpu.q
 ##$ -l mem_free=50G
 ##$ -l h_rt=144:00:00
 ##$ -m ea
@@ -24,32 +25,32 @@ MODEL_NAME="xenium_aa"                     # MODIFY. Name of the fine-tuned mode
 METADATA="Xenium_AA_metadata.tsv"          # MODIFY. Contains the model labels (not from new dataset)
 GENES="gene_names_xenium.txt"              # MODIFY
 STAGE="inference"
-EMBED_DIM=1024    # Options: 512 1024 2048
+EMBED_DIM=1024                             # Options: 512 1024 2048
 
 INPUT_DIR="${PROJECT_ROOT}/data/${MODALITY}"
 CACHE_DIR="${PROJECT_ROOT}/cache"
 CONFIG_FILE="${PROJECT_ROOT}/config.yaml"
 
 LABELS="${INPUT_DIR}/${METADATA}"
-TRUE_LABELS="NULL"                    # MODIFY; Options: "${LABELS}" or "NULL"
-BARCODES="NULL"                       # MODIFY; cache hold-out barcodes or "NULL"
+TRUE_LABELS="NULL"                         # MODIFY. Options: "${LABELS}" or "NULL"
+BARCODES="NULL"                            # MODIFY. Cache hold-out barcodes or "NULL"
 #BARCODES="${CACHE_DIR}/finetune/${MODEL_NAME}/metadata/inference_barcodes.txt"
 
 
-echo "${TRUE_LABELS}, ${BARCODES}"
-
 GENE_NAMES_FILE="${INPUT_DIR}/${GENES}"
-MODEL="${PROJECT_ROOT}/model_weights/finetune/${MODEL_NAME}_embed_${EMBED_DIM}/${MODEL_NAME}_${EMBED_DIM}_finetuned.pt"
+MODEL="${PROJECT_ROOT}/model_weights/finetune/${MODEL_NAME}/embed_${EMBED_DIM}/${MODEL_NAME}_${EMBED_DIM}_finetuned.pt"
 
 DATA_MATRIX="${INPUT_DIR}/${MATRIX_FILE}"
 DATASET_NAME=$(basename "$DATA_MATRIX" ".csv.gz")
 
-CACHE_PREFIX="${CACHE_DIR}/${STAGE}/${MODEL_NAME}_embed_${EMBED_DIM}"   # $(date +%Y%m%d_%H%M%S)"
+CACHE_PREFIX="${CACHE_DIR}/${STAGE}/${MODEL_NAME}/embed_${EMBED_DIM}"   # $(date +%Y%m%d_%H%M%S)"
 OUTPUT_DIR="${PROJECT_ROOT}/results/${MODEL_NAME}/${DATASET_NAME}_${EMBED_DIM}_${STAGE}"
 OUTPUT_PREFIX="${OUTPUT_DIR}/${DATASET_NAME}_${STAGE}"
 
 
 # ========================================================================================
+echo "${TRUE_LABELS}, ${BARCODES}"
+
 # CPU/GPU Setup
 print_cpu_info() {
     echo "Detected ${TOTAL_CPUS} CPU(s) — using ${CPUS}"
@@ -112,7 +113,7 @@ prepare_directories
 # ========================================================================================
 # RUN THE SCRIPT
 
-# Forces CUDA to run synchronously for easier debugging
+# Forces CUDA to run synchronously for debugging
 # CUDA_LAUNCH_BLOCKING=1 
 python -m src.training.inference \
     "${DATA_MATRIX}" \
