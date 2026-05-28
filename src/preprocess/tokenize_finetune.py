@@ -48,6 +48,54 @@ def preprocess(tokenizer, examples):
         )
     }
 
+def load_expression_matrix_auto(input_file: str) -> pd.DataFrame:
+    """
+    Load expression matrix:
+      - Prefer loading split numpy files (`input_file` directory and basename):
+          <base>_values.npz (expects key 'float_values')
+          <base>_index.npy
+          <base>_columns.npy
+      - Else fall back to CSV/TSV (optionally gzipped)
+    Returns a DataFrame with cells as rows and genes as columns, and index = barcodes.
+    """
+    # Normalize base path
+    base = input_file.replace(".csv.gz", "").replace(".csv", "")
+    #base = input_file
+    #for ext in (".csv.gz", ".tsv.gz", ".csv", ".tsv"):
+    #    if base.endswith(ext):
+    #        base = base[: -len(ext)]
+    #        break
+
+    values_path  = f"{base}_values.npz"
+    index_path   = f"{base}_index.npy"
+    columns_path = f"{base}_columns.npy"
+
+    if os.path.exists(values_path) and os.path.exists(index_path) and os.path.exists(columns_path):
+        debug_log(f"Using numpy split files:\n  {values_path}\n  {index_path}\n  {columns_path}")
+        float_values = np.load(values_path)["float_values"]
+        index = np.load(index_path, allow_pickle=True)
+        columns = np.load(columns_path, allow_pickle=True)
+        df = pd.DataFrame(float_values, index=index, columns=columns)
+    else:
+        debug_log(f"Numpy split files not found. Loading expression matrix: {input_file}")
+            df = pd.read_csv(
+            input_file,
+            sep=r"[,\t]",
+            engine="python",
+            compression="gzip" if input_file.endswith(".gz") else None
+        )
+
+    # Make barcode index consistent
+    if "CellName" in df.columns:
+        df = df.set_index("CellName")
+    elif "Unnamed: 0" in df.columns:
+        df = df.rename(columns={"Unnamed: 0": "CellName"}).set_index("CellName")
+    else:
+        # assume first col is barcode
+        df = df.rename(columns={df.columns[0]: "CellName"}).set_index("CellName")
+
+    return df
+
 def generate_dataset_rows(cell_barcodes, gene_expressions, gene_names):
     """
     Generates per cell gene expression data rows for Dataset.from_generator.
@@ -117,6 +165,7 @@ def create_and_cache_tokenized_dataset(debug=False, use_cache=True, tokenizer=No
     os.makedirs(os.path.dirname(expressions_cache_file), exist_ok=True)
 
 
+    # READ INPUT MATRIX
     if use_cache and os.path.exists(expressions_cache_file):
         debug_log("Loading cached gene expressions from disk.") 
         data = np.load(expressions_cache_file, allow_pickle=True)
@@ -128,18 +177,23 @@ def create_and_cache_tokenized_dataset(debug=False, use_cache=True, tokenizer=No
         del data
     else:
         debug_log(f"Importing dataset from {input_file}")
-        df = pd.read_csv(input_file, sep=r'[,\t]', engine='python', compression='gzip') if input_file.endswith('.gz') else pd.read_csv(input_file, sep=r'[,\t]', engine='python')
-        df.rename(columns={'Unnamed: 0': 'CellName'}, inplace=True)
-        df.rename(columns={df.columns[0]: 'CellName'}, inplace=True)
-        cell_barcodes = df['CellName'].tolist()
+        # Load matrix. Prefer numpy split files if present
+        df = load_expression_matrix_auto(input_file)   # returns index=barcodes, cols=genes
         
-        #cell_barcodes = df.index.astype(str).tolist()
-    
-        gene_expressions = df.iloc[:, 1:].to_numpy(dtype=np.float32)  # Numpy matrix
-        # df['gene_expressions'] = df.iloc[:, 1:-1].apply(lambda row: row.values, axis=1)
-        gene_names = df.columns[1:].tolist()
-        # df = pd.merge(df, labels, on='CellName', how='inner')
-        # df = df[['CellName', 'ID', 'gene_expressions']]
+        # Holdout exclusion
+        if holdout_file and str(holdout_file).lower() != "null" and os.path.exists(holdout_file):
+            with open(holdout_file, "r") as f:
+                holdout = set(x.strip() for x in f if x.strip())
+            before_n = df.shape[0]
+            df = df.loc[~df.index.astype(str).isin(holdout)]
+            after_n = df.shape[0]
+            debug_log(f"Excluded {before_n - after_n} holdout cells using {holdout_file}. Remaining: {after_n}")
+        
+        # Convert format
+        cell_barcodes = df.index.astype(str).tolist()
+        gene_names = df.columns.astype(str).tolist()
+        gene_expressions = df.to_numpy(dtype=np.float32)
+
 
     debug_log(f"Loaded the matrix with {len(cell_barcodes)} cells and {len(gene_names)} genes.")
         
@@ -206,54 +260,52 @@ def create_and_cache_tokenized_dataset(debug=False, use_cache=True, tokenizer=No
         
     dataset = Dataset.from_generator(gen)
 
-    # Split dataset into training, testing, and inference sets
-    train_temp_split = dataset.train_test_split(test_size=0.20, seed=42) 
-    test_infer_split = train_temp_split['test'].train_test_split(test_size=0.5, seed=42)
-
-    train_dataset, test_dataset, inference_dataset = (
-        train_temp_split['train'], test_infer_split['train'], test_infer_split['test']
-    )
-
+    # Split dataset into training and testing sets
+    split = dataset.train_test_split(test_size=0.10, seed=42)
+    train_dataset = split["train"]
+    test_dataset   = split["test"]
+    
     # Extract and save barcode metadata
-    train_barcodes, test_barcodes, inference_barcodes = (
-        [x['barcode'] for x in split] for split in (train_dataset, test_dataset, inference_dataset)
-    )
-
-    metadata_dir = os.path.join(cache_prefix, 'metadata')
+    train_barcodes = [x["barcode"] for x in train_dataset]
+    test_barcodes   = [x["barcode"] for x in test_dataset]
+    
+    metadata_dir = os.path.join(cache_prefix, "metadata")
     os.makedirs(metadata_dir, exist_ok=True)
     os.makedirs(prefix, exist_ok=True)
     
     barcode_files = {
-        'train_barcodes.txt': train_barcodes,
-        'test_barcodes.txt': test_barcodes,
-        'inference_barcodes.txt': inference_barcodes,
+        "train_barcodes.txt": train_barcodes,
+        "test_barcodes.txt": test_barcodes,
     }
     for filename, barcodes in barcode_files.items():
-        with open(f'{metadata_dir}/{filename}', 'w') as f:
-            #f.writelines('\n'.join(barcodes))
-            f.writelines('\n'.join(map(str, barcodes)))
-
+        with open(os.path.join(metadata_dir, filename), "w") as f:
+            f.write("\n".join(map(str, barcodes)))
     
-    debug_log(f"Tokenizing the train and test genes.")
-
-    tokenized_train_set, tokenized_test_set = (
-        dataset.map(lambda examples: preprocess(tokenizer, examples), num_proc=num_proc)
-        for dataset in (train_dataset, test_dataset)
+    debug_log("Tokenizing the train and test genes.")
+    
+    tokenized_train_set = train_dataset.map(
+        lambda examples: preprocess(tokenizer, examples),
+        num_proc=num_proc
     )
-
-    # Remove raw columns no longer needed
-    columns_to_remove = ['gene_names', 'gene_expressions', 'barcode'] # 'cell_label', 
+    tokenized_test_set = test_dataset.map(
+        lambda examples: preprocess(tokenizer, examples),
+        num_proc=num_proc
+    )
+    
+    # Remove raw columns
+    columns_to_remove = ["gene_names", "gene_expressions", "barcode"]
     tokenized_train_set = tokenized_train_set.remove_columns(columns_to_remove)
-    tokenized_test_set = tokenized_test_set.remove_columns(columns_to_remove)
-
+    tokenized_test_set   = tokenized_test_set.remove_columns(columns_to_remove)
+    
     # Save tokenized datasets
     tokenized_train_set.save_to_disk(train_cache_file)
     tokenized_test_set.save_to_disk(test_cache_file)
-        
+    
     debug_log("_______________\n")
     debug_log(f"Datasets cached: {train_cache_file}, {test_cache_file}\n")
-        
+    
     return tokenized_train_set, tokenized_test_set
+
 
 @track_performance
 def start_loop(debug=False, use_cache=True):
@@ -274,17 +326,18 @@ def start_loop(debug=False, use_cache=True):
     debug_log("Model, optimizer, and loss function setup complete. \n")
 
 if __name__ == "__main__":
-    if len(sys.argv) - 1 != 6:
-        print(f"Error: Expected 6 arguments, but got {len(sys.argv) - 1}.")
-        print("Usage: python preprocess.py <input_file> <genes_file> <prefix> <labels_file> <config_file> <num_proc>")
+    if len(sys.argv) - 1 != 7:
+        print(f"Error: Expected 7 arguments, but got {len(sys.argv) - 1}.")
+        print("Usage: python preprocess.py <input_file> <genes_file> <prefix> <labels_file> <config_file> <num_proc> [holdout_file|NULL]")
         sys.exit(1)
 
     input_file  = sys.argv[1]
     genes_file  = sys.argv[2]
     prefix      = sys.argv[3]
     labels_file = sys.argv[4]
-    config_file = sys.argv[5]
-    num_proc    = int(sys.argv[6])
+    holdout_file = sys.argv[5] if (len(sys.argv) - 1 == 7) else "NULL"
+    config_file = sys.argv[6]
+    num_proc    = int(sys.argv[7])
     # num_workers = os.cpu_count()
 
     load_config(config_file)
