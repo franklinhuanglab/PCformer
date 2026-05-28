@@ -1,5 +1,4 @@
 #!/bin/bash
-# ========================================================================================
 #$ -S /bin/bash
 #$ -cwd
 #$ -j y
@@ -19,22 +18,22 @@ TOTAL_CPUS=$(nproc --all)
 # USER MODIFIED VARIABLES
 CPUS=8  # Or: $((TOTAL_CPUS - 2)); Wynton: $NSLOTS
 
-MODALITY="Xenium"                          # MODIFY. Where the input files live in `data`
-MATRIX_FILE="Xenium_EA_matrix.csv.gz"      # MODIFY. Input expression matrix
-MODEL_NAME="xenium_aa"                     # MODIFY. Name of the fine-tuned model
-METADATA="Xenium_AA_metadata.csv"          # Model-specific labels, not from new inf dataset
-GENES="gene_names_xenium.txt"              # Vocabulary of genes
+MODALITY="scRNA"                          # MODIFY. Where the input files live in `data`
+MATRIX_FILE="Atlas_Matrix.csv.gz"         # MODIFY. Input expression matrix
+MODEL_NAME="pc_atlas"                     # MODIFY. Name of the fine-tuned model
+METADATA="Atlas_Metadata.csv"             # Model-specific labels, not from new inf dataset
+GENES="gene_names.txt"                    # Vocabulary of genes
 STAGE="inference"
-EMBED_DIM=1024                             # Options: 512 1024 2048
+EMBED_DIM=1024                            # Options: 512 1024 2048
 
 INPUT_DIR="${PROJECT_ROOT}/data/${MODALITY}"
 CACHE_DIR="${PROJECT_ROOT}/cache"
 CONFIG_FILE="${PROJECT_ROOT}/config.yaml"
 
 LABELS="${INPUT_DIR}/${METADATA}"
-TRUE_LABELS="NULL"                         # MODIFY. Options: "${LABELS}" or "NULL"
-BARCODES="NULL"                            # MODIFY. Cache hold-out barcodes or "NULL"
-#BARCODES="${CACHE_DIR}/finetune/${MODEL_NAME}/metadata/inference_barcodes.txt"
+TRUE_LABELS="${INPUT_DIR}/${METADATA}"      # MODIFY. Options: "${LABELS}" or "NULL"
+#BARCODES="NULL"                            # MODIFY. Cache hold-out barcodes or "NULL"
+BARCODES="${CACHE_DIR}/pretrain/${MODEL_NAME}/metadata/holdout_barcodes.txt"
 
 
 GENE_NAMES_FILE="${INPUT_DIR}/${GENES}"
@@ -126,6 +125,3 @@ python -m src.training.inference \
     "${CONFIG_FILE}" \
     "${OUTPUT_PREFIX}" \
     "${CPUS}"
-
-
-# ========================================================================================
