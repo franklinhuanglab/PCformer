@@ -1,36 +1,34 @@
 #!/usr/bin/env python3
-# ========================================================================================
-# Authors: Keila Velazquezk-Arcelay
-# Updated: 2025-10-16
-# Description: Subset a matrix dataset to a fixed fraction of the rows.
-#              Filter Metadata file based on kept barcodes.
-# 
-# ========================================================================================
 import numpy as np
 import pandas as pd
 import time
+# ----------------------------------------------------------------------------------------
+# Description: Subset a matrix dataset to a fixed fraction of the rows.
+#              Filter Metadata file based on kept barcodes.
+# 
+# ----------------------------------------------------------------------------------------
 
 start = time.time()
 
 np.random.seed(42)
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # USER MODIFIED VARIABLES
-data_prefix = '/home/data/spatial/Xenium_AA'
+data_prefix = '/home/data/scRNA/Atlas'
 
 pct = 0.05
 
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # DATA LOADING AND INITIALIZATIONS
 
 # First column (cell names) as index
 print("Importing dataset from: ", data_prefix)
-df = pd.read_csv(f'{data_prefix}_Matrix.csv.gz', index_col=0, compression='gzip')
-md = pd.read_csv(f'{data_prefix}_Metadata.tsv', index_col=0, sep='\t')
+df = pd.read_csv(f'{data_prefix}_matrix.csv.gz', index_col=0, compression='gzip')
+md = pd.read_csv(f'{data_prefix}_metadata.tsv', index_col=0, sep='\t')
 
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # Compute N% of the dataset
 subset_size = int(pct * df.shape[0])
 print("Subset size will be: ", subset_size)
@@ -62,7 +60,6 @@ md_filt = md.reindex(subset_df.index).reset_index()
 
 print("Saving metadata to: ", data_prefix)
 md_filt.to_csv(f'{data_prefix}_{int(pct*100)}pct_metadata.csv', index=False)
-
 
 
 end = time.time()

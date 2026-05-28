@@ -7,24 +7,24 @@
 ##$ -l mem_free=50G
 ##$ -l h_rt=144:00:00
 ##$ -m ea
-# =============================================================================
+# ----------------------------------------------------------------------------------------
 # Use the fine-tuned model to predict cell types in a hold-out or new dataset
-# =============================================================================
+# ----------------------------------------------------------------------------------------
 PROJECT_ROOT="$(dirname "$(dirname "$(realpath "$0")")")"
 cd "$PROJECT_ROOT"
 TOTAL_CPUS=$(nproc --all)
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # USER MODIFIED VARIABLES
-CPUS=8  # Or: $((TOTAL_CPUS - 2)); Wynton: $NSLOTS
+CPUS=8  # Or: $((TOTAL_CPUS - 2)); HPC: $NSLOTS
 
-MODALITY="scRNA"                          # MODIFY. Where the input files live in `data`
-MATRIX_FILE="Atlas_Matrix.csv.gz"         # MODIFY. Input expression matrix
-MODEL_NAME="pc_atlas"                     # MODIFY. Name of the fine-tuned model
-METADATA="Atlas_Metadata.csv"             # Model-specific labels, not from new inf dataset
-GENES="gene_names.txt"                    # Vocabulary of genes
+MODALITY="Xenium"                          # MODIFY. Where the input files live in `data`
+MATRIX_FILE="Xenium_AA_5pct_matrix.csv.gz" # MODIFY. Input expression matrix
+MODEL_NAME="xenium_aa_5pct"                # MODIFY. Name of the fine-tuned model
+METADATA="Xenium_AA_5pct_metadata.csv"     # Model-specific labels, not from new inf dataset
+GENES="gene_names_xenium.txt"              # Vocabulary of genes
 STAGE="inference"
-EMBED_DIM=1024                            # Options: 512 1024 2048
+EMBED_DIM=1024                             # Options: 512 1024 2048
 
 INPUT_DIR="${PROJECT_ROOT}/data/${MODALITY}"
 CACHE_DIR="${PROJECT_ROOT}/cache"
@@ -47,7 +47,7 @@ OUTPUT_DIR="${PROJECT_ROOT}/results/${MODEL_NAME}/${DATASET_NAME}_${EMBED_DIM}_$
 OUTPUT_PREFIX="${OUTPUT_DIR}/${DATASET_NAME}_${STAGE}"
 
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 echo "${TRUE_LABELS}, ${BARCODES}"
 
 # CPU/GPU Setup
@@ -69,7 +69,7 @@ print_gpu_info() {
     fi
 }
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 setup_environment() {
     echo "Activating conda environment..."
     # conda activate pt
@@ -109,11 +109,9 @@ setup_environment
 prepare_directories
 
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # RUN THE SCRIPT
 
-# Forces CUDA to run synchronously for debugging
-# CUDA_LAUNCH_BLOCKING=1 
 python -m src.training.inference \
     "${DATA_MATRIX}" \
     "${GENE_NAMES_FILE}" \

@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
-# ========================================================================================
-# Authors: Keila Velazquezk-Arcelay
-# Updated: 2025-10-16
-# Description: Imports h5ad expression file and extracts matching barcodes and class IDs
-# 
-# ========================================================================================
 import scanpy as sc
 import pandas as pd
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
+# Description: Imports h5ad expression file and extracts matching barcodes and class IDs
+# 
+# ----------------------------------------------------------------------------------------
+
 # USER MODIFIED VARIABLES
-input_dir = "all_sn_integrated_nlayers2_nlatent10_final_demux.h5ad"
-output_dir = "snRNA_barcode_subcluster.csv"
+input_dir = "filtered_feature_bc_matrix.h5ad"
+output_dir = "file_barcode_subcluster.csv"
 
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 
 adata = sc.read_h5ad(data_dir)
 

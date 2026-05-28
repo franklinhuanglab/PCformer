@@ -194,14 +194,10 @@ def create_and_cache_tokenized_dataset(debug=False, use_cache=True, tokenizer=No
             gene_names = data['gene_names']
         else:
             debug_log(f"Importing dataset from {input_file}")
-            #if input_file.endswith('.gz'):
-            #    df = pd.read_csv(input_file, index_col=0, sep=r'[,\t]', engine='python', compression='gzip') # , dtype=np.float32
-            #else:
-            #    df = pd.read_csv(input_file, index_col=0, sep=r'[,\t]', engine='python') # , dtype=np.float32
-            float_values = np.load('/workspace/PCformer/data/scRNA/Atlas_values.npz')['float_values']
-            index = np.load('/workspace/PCformer/data/scRNA/Atlas_index.npy', allow_pickle=True)
-            columns = np.load('/workspace/PCformer/data/scRNA/Atlas_columns.npy', allow_pickle=True)
-            df = pd.DataFrame(float_values, index=index, columns=columns)
+            if input_file.endswith('.gz'):
+                df = pd.read_csv(input_file, index_col=0, sep=r'[,\t]', engine='python', compression='gzip') # , dtype=np.float32
+            else:
+                df = pd.read_csv(input_file, index_col=0, sep=r'[,\t]', engine='python') # , dtype=np.float32
 
             cell_barcodes = df.index.tolist()
         

@@ -1,25 +1,20 @@
 #!/usr/bin/env python3
-# ========================================================================================
-# Authors: Keila Velazquezk-Arcelay
-# Updated: 2025-10-16
-# Description: Extract the expression matrix from an h5/h5ad file and export as csv.
-#              Optionally, subsets the data to a fraction of the rows.
-# 
-# ========================================================================================
 import os
 import time
 import numpy as np
 import pandas as pd
 import scanpy as sc
 import anndata
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
+# Description: Extract the expression matrix from an h5/h5ad file and export as csv.
+#              Optionally, subsets the data to a fraction of the rows.
+# 
+# ----------------------------------------------------------------------------------------
 # USER MODIFIED VARIABLES
 
-root_dir = "home/data/spatial"
-#input_file = "PNI1_8um_PCA_Filtered_cols_fixed.csv.gz"  # or "PNI1_8um_PCA_Filtered.h5ad"
-#output_file = "PNI1_8um_PCA_Filtered_20pct.csv.gz"
-input_file = f"{root_dir}/snRNA_nlayers2_nlatent10_v2.h5ad"
-output_file = f"{root_dir}/snRNA_nlayers2_nlatent10_v2.csv.gz"
+root_dir = "home/data/scRNA"
+input_file = f"{root_dir}/filtered_feature_bc_matrix.h5ad"
+output_file = f"{root_dir}/filtered_feature_bc_matrix.csv.gz"
 
 # Set to None or 0 to disable subsetting.
 # If 0 < subset_fraction <= 1: take that fraction of rows.
@@ -30,7 +25,7 @@ np.random.seed(random_seed)
 
 start = time.time()
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # DATA LOADING AND INITIALIZATIONS
 
 if input_file.endswith(".h5ad"):
@@ -47,7 +42,7 @@ else:
     df = pd.read_csv(input_file, index_col=0, sep=r'[,\t]', engine='python', compression='gzip' if input_file.endswith(".gz") else None)
 
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # SUBSET
 
 def subset_dataset(df, subset_fraction, random_seed=None):
@@ -80,8 +75,7 @@ subset_df = pd.DataFrame(
 )
 """
 
-
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # SAVE
 df_out.to_csv(output_file, compression='gzip' if output_file.endswith(".gz") else None)
 

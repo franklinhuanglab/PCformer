@@ -6,23 +6,23 @@
 ##$ -l mem_free=32G
 ##$ -l h_rt=14:00:00
 ##$ -m ea
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # Pre-process a corpus dataset before running fine-tuning.
 # Performs train/test split, gene tokenization, token ranking.
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 PROJECT_ROOT="$(dirname "$(dirname "$(realpath "$0")")")"
 cd "$PROJECT_ROOT"
 TOTAL_CPUS=$(nproc --all)
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # USER MODIFIED VARIABLES
-CPUS=16  # Or: $((TOTAL_CPUS - 2)); Wynton: $NSLOTS
+CPUS=16  # Or: $((TOTAL_CPUS - 2)); HPC: $NSLOTS
 
-MODALITY="scRNA"
-MATRIX_FILE="Atlas_Matrix.csv.gz"
-MODEL_NAME="pc_atlas"
-METADATA="Atlas_Metadata.csv"
-GENES="gene_names.txt"
+MODALITY="Xenium"
+MATRIX_FILE="Xenium_AA_5pct_matrix.csv.gz"
+MODEL_NAME="xenium_aa_5pct"
+METADATA="Xenium_AA_5pct_metadata.csv"
+GENES="gene_names_xenium.txt"
 STAGE="finetune"
 EMBED_DIM=1024          # Options: 512 1024 2048
 
@@ -37,7 +37,7 @@ GENE_NAMES_FILE="${INPUT_DIR}/${GENES}"
 CACHE_PREFIX="${CACHE_DIR}/${STAGE}/${MODEL_NAME}" # _embed_${EMBED_DIM}"   # $(date +%Y%m%d_%H%M%S)"
 BARCODES="${CACHE_DIR}/pretrain/${MODEL_NAME}/metadata/holdout_barcodes.txt"
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # ENVIRONMENT SETUP
 
 print_cpu_info() {
@@ -82,7 +82,7 @@ prepare_directories
 #setup_environment
 #disable_huggingface_cache
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # RUN THE SCRIPT
 
 python -m src.preprocess.tokenize_finetune \

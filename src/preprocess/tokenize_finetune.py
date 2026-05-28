@@ -78,7 +78,7 @@ def load_expression_matrix_auto(input_file: str) -> pd.DataFrame:
         df = pd.DataFrame(float_values, index=index, columns=columns)
     else:
         debug_log(f"Numpy split files not found. Loading expression matrix: {input_file}")
-            df = pd.read_csv(
+        df = pd.read_csv(
             input_file,
             sep=r"[,\t]",
             engine="python",

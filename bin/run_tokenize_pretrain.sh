@@ -1,5 +1,4 @@
 #!/bin/bash
-# ========================================================================================
 #$ -S /bin/bash
 #$ -cwd
 #$ -j yes
@@ -7,22 +6,22 @@
 ##$ -l mem_free=30G
 ##$ -l h_rt=12:00:00
 ##$ -m ea
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # Pre-process a corpus dataset before running pre-training.
 # Performs train/test split, gene tokenization, token ranking.
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 PROJECT_ROOT="$(dirname "$(dirname "$(realpath "$0")")")"
 cd "$PROJECT_ROOT"
 TOTAL_CPUS=$(nproc --all)
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # USER MODIFIED VARIABLES
-CPUS=16  # Or: $((TOTAL_CPUS - 2)); Wynton: $NSLOTS
+CPUS=16  # Or: $((TOTAL_CPUS - 2)); HPC: $NSLOTS
 
 MODALITY="Xenium"
-MATRIX_FILE="Xenium_AA_matrix.csv.gz"
-MODEL_NAME="xenium_aa"
-METADATA="Xenium_AA_metadata.csv"
+MATRIX_FILE="Xenium_AA_5pct_matrix.csv.gz"
+MODEL_NAME="xenium_aa_5pct"
+METADATA="Xenium_AA_5pct_metadata.csv"
 GENES="gene_names_xenium.txt"
 STAGE="pretrain"
 
@@ -36,7 +35,7 @@ GENE_NAMES_FILE="${INPUT_DIR}/${GENES}"
 CACHE_PREFIX="${CACHE_DIR}/${STAGE}/${MODEL_NAME}"   # $(date +%Y%m%d_%H%M%S)"
 
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # ENVIRONMENT SETUP
 
 print_cpu_info() {
@@ -81,7 +80,7 @@ prepare_directories
 #disable_huggingface_cache
 
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # RUN THE SCRIPT
 
 python -m src.preprocess.tokenize_pretrain \
@@ -90,7 +89,4 @@ python -m src.preprocess.tokenize_pretrain \
     "${CACHE_PREFIX}" \
     "${CONFIG_FILE}" \
     "${CPUS}"
-
-
-# ========================================================================================
 

@@ -1,29 +1,20 @@
 #!/usr/bin/env Rscript
-# ========================================================================================
-# Authors: Keila Velazquezk-Arcelay
-# Updated: 2025-10-16
-# Description: Convert an h5 matrix to a csv file
-# 
-# ========================================================================================
 library(Seurat)
 library(data.table)
 setDTthreads(8)
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
+# Description: Convert an h5 matrix to a csv file
+# 
+# ----------------------------------------------------------------------------------------
 # USER MODIFIED VARIABLES
-#dir <- "/wynton/group/fhuang/Spatial/VisiumHD/PNI2_output/square_008um"
-#dir <- "/wynton/group/fhuang/Spatial/VisiumHD/PNI2_output/square_016um"
-#dir <- "/wynton/group/fhuang/Spatial/VisiumHD/PNI1_output/square_008um"
-dir <- "/wynton/group/fhuang/Spatial/VisiumHD/PNI1_output/square_016um"
+dir <- "data/scRNA"
 
 basename <- "filtered_feature_bc_matrix"
 
-#filename <- paste0(basename, "_PNI2_008_Keila.h5")
-#filename <- paste0(basename, "_PNI2_016_Keila.h5")
-#filename <- paste0(basename, "_PNI1_008_Keila.h5")
-filename <- paste0(basename, "_PNI1_016_Keila.h5")
+filename <- paste0(basename, "_matrix.h5")
 
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # DATA LOADING AND INITIALIZATIONS
 
 h5_file <- file.path(dir, filename)
@@ -35,7 +26,7 @@ mat <- Read10X_h5(h5_file)
 # seurat_obj <- CreateSeuratObject(counts = mat)
 
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 
 # Transpose: genes as columns, barcodes as rows
 mat_t <- t(mat)

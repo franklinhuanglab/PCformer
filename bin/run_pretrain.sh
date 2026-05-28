@@ -1,5 +1,4 @@
 #!/bin/bash
-# ========================================================================================
 #$ -S /bin/bash
 #$ -cwd
 #$ -j yes
@@ -8,25 +7,24 @@
 ##$ -l mem_free=20G
 ##$ -l h_rt=05:00:00
 ##$ -m ea
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # Pre-train a model to learn general representations from a corpus dataset
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 PROJECT_ROOT="$(dirname "$(dirname "$(realpath "$0")")")"
 cd "$PROJECT_ROOT"
 TOTAL_CPUS=$(nproc --all)
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # USER MODIFIED VARIABLES
-CPUS=2  # Or: $((TOTAL_CPUS - 2)); Wynton: $NSLOTS
+CPUS=2  # Or: $((TOTAL_CPUS - 2)); HPC: $NSLOTS
 
 MODALITY="Xenium"
-MATRIX_FILE="Xenium_AA_matrix.csv.gz"
-MODEL_NAME="xenium_aa"
-METADATA="Xenium_AA_metadata.csv"
+MATRIX_FILE="Xenium_AA_5pct_matrix.csv.gz"
+MODEL_NAME="xenium_aa_5pct"
+METADATA="Xenium_AA_5pct_metadata.csv"
 GENES="gene_names_xenium.txt"
 STAGE="pretrain"
 EMBED_DIM=1024          # Options: 512 1024 2048
-
 
 INPUT_DIR="${PROJECT_ROOT}/data/${MODALITY}"
 CACHE_DIR="${PROJECT_ROOT}/cache"
@@ -38,7 +36,7 @@ CACHE_PREFIX="${CACHE_DIR}/${STAGE}/${MODEL_NAME}" # _embed_${EMBED_DIM}"   # $(
 OUTPUT="$PROJECT_ROOT/model_weights/${STAGE}/${MODEL_NAME}/embed_${EMBED_DIM}/${MODEL_NAME}_${EMBED_DIM}_ranked_model"           # Script adds `.pt` to weights file
 
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # ENVIRONMENT SETUP
 
 print_cpu_info() {
@@ -104,10 +102,9 @@ prepare_directories
 #disable_huggingface_cache
 
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # RUN THE SCRIPT
 
-#CUDA_LAUNCH_BLOCKING=1 
 python -m src.training.pretrain \
     "${DATA_MATRIX}" \
     "${GENE_NAMES_FILE}" \
@@ -115,7 +112,4 @@ python -m src.training.pretrain \
     "${CONFIG_FILE}" \
     "${OUTPUT}" \
     "${CPUS}"
-
-
-# ========================================================================================
 

@@ -1,21 +1,18 @@
 #!/usr/bin/env python3
-# ========================================================================================
-# Authors: Keila Velazquezk-Arcelay
-# Updated: 2025-10-16
-# Description: For faster import, convert an expression matrix into 3 numpy files: 
-#              *_columns.npy, *_index.npy, *_values.npz
-# 
-# ========================================================================================
 import re
 import pandas as pd
 import numpy as np
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
+# Description: For faster import, convert an expression matrix into 3 numpy files: 
+#              *_columns.npy, *_index.npy, *_values.npz
+# 
+# ----------------------------------------------------------------------------------------
 # USER MODIFIED VARIABLES
-directory = '/home/data/spatial'
-prefix = 'Xenium_AA_15pct'
+directory = '/home/data/scRNA'
+prefix = 'Atlas'
 
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # DATA LOADING AND INITIALIZATIONS
 matrix_file = f'{directory}/{prefix}_matrix.csv.gz'
 float_np_file = f'{directory}/{prefix}_values.npz'
@@ -23,7 +20,7 @@ index_file = f'{directory}/{prefix}_index.npy'
 columns_file = f'{directory}/{prefix}_columns.npy'
 
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 # HELPERS
 def import_full_matrix(data):
     df_full = pd.read_csv(data, index_col=0, compression='gzip')
@@ -39,7 +36,7 @@ def import_full_matrix(data):
     return df_full
 
 
-# ========================================================================================
+# ----------------------------------------------------------------------------------------
 
 #df_full = import_decomposed_df(float_np_file, index_file, columns_file)
 df = import_full_matrix(matrix_file)
