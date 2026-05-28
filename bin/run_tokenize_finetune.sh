@@ -1,5 +1,4 @@
 #!/bin/bash
-# ========================================================================================
 #$ -S /bin/bash
 #$ -cwd
 #$ -j yes 
@@ -19,11 +18,11 @@ TOTAL_CPUS=$(nproc --all)
 # USER MODIFIED VARIABLES
 CPUS=16  # Or: $((TOTAL_CPUS - 2)); Wynton: $NSLOTS
 
-MODALITY="Xenium"
-MATRIX_FILE="Xenium_AA_5pct_matrix.csv.gz"
-MODEL_NAME="xenium_aa_5pct"
-METADATA="Xenium_AA_5pct_metadata.csv"
-GENES="gene_names_xenium.txt"
+MODALITY="scRNA"
+MATRIX_FILE="Atlas_Matrix.csv.gz"
+MODEL_NAME="pc_atlas"
+METADATA="Atlas_Metadata.csv"
+GENES="gene_names.txt"
 STAGE="finetune"
 EMBED_DIM=1024          # Options: 512 1024 2048
 
@@ -36,7 +35,7 @@ CONFIG_FILE="${PROJECT_ROOT}/config.yaml"
 DATA_MATRIX="${INPUT_DIR}/${MATRIX_FILE}"
 GENE_NAMES_FILE="${INPUT_DIR}/${GENES}"
 CACHE_PREFIX="${CACHE_DIR}/${STAGE}/${MODEL_NAME}" # _embed_${EMBED_DIM}"   # $(date +%Y%m%d_%H%M%S)"
-
+BARCODES="${CACHE_DIR}/pretrain/${MODEL_NAME}/metadata/holdout_barcodes.txt"
 
 # ========================================================================================
 # ENVIRONMENT SETUP
@@ -91,8 +90,6 @@ python -m src.preprocess.tokenize_finetune \
     "${GENE_NAMES_FILE}" \
     "${CACHE_PREFIX}" \
     "${LABELS}" \
+    "${BARCODES}" \
     "${CONFIG_FILE}" \
     "${CPUS}"
-
-# ========================================================================================
-
