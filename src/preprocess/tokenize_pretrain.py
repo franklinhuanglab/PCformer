@@ -21,13 +21,20 @@ from src.preprocess import GeneTokenizer
 from src import *
 
 
-def save_split_data(cache_prefix, use_cache, tokenized_train_set, tokenized_test_set):
+def save_split_data(
+    cache_prefix,
+    use_cache,
+    tokenized_train_set,
+    tokenized_test_set,
+    holdout_barcodes
+):
     """
-    Saves tokenized train/test datasets and their corresponding barcode metadata to disk.
+    Saves tokenized train/test datasets and their corresponding barcode metadata to disk. 
+    Also saves holdout barcodes without tokenizing or caching them.
 
     Steps:
-      - Extracts barcodes from the tokenized datasets
-      - Writes train and test barcodes to `metadata`
+      - Extracts barcodes from tokenized train/test datasets
+      - Writes train, test, and holdout barcodes to `metadata/`
       - Saves Hugging Face `Dataset` objects under `train/` and `test/`
 
     Args:
@@ -35,43 +42,62 @@ def save_split_data(cache_prefix, use_cache, tokenized_train_set, tokenized_test
         use_cache (bool): Whether to persist datasets to disk
         tokenized_train_set (datasets.Dataset): Tokenized train dataset
         tokenized_test_set (datasets.Dataset): Tokenized test dataset
+        holdout_barcodes (list[str]): Barcodes reserved strictly for inference
 
     Returns:
         tuple: Paths to saved train and test dataset directories
     """
-    metadata_dir = os.path.join(cache_prefix, 'metadata')
+    metadata_dir = os.path.join(cache_prefix, "metadata")
     os.makedirs(metadata_dir, exist_ok=True)
 
-    train_barcodes_path = os.path.join(metadata_dir, 'train_barcodes.txt')
-    test_barcodes_path = os.path.join(metadata_dir, 'test_barcodes.txt')
+    train_barcodes_path   = os.path.join(metadata_dir, "train_barcodes.txt")
+    test_barcodes_path    = os.path.join(metadata_dir, "test_barcodes.txt")
+    holdout_barcodes_path = os.path.join(metadata_dir, "holdout_barcodes.txt")
 
     debug_log("Saving the split barcodes.")
-    
-    train_barcodes = [example['barcode'] for example in tokenized_train_set]
-    test_barcodes = [example['barcode'] for example in tokenized_test_set]
 
-    with open(train_barcodes_path, 'w') as f:
-        f.write('\n'.join(train_barcodes))
-    with open(test_barcodes_path, 'w') as f:
-        f.write('\n'.join(test_barcodes))
+    train_barcodes = [ex["barcode"] for ex in tokenized_train_set]
+    test_barcodes  = [ex["barcode"] for ex in tokenized_test_set]
 
-    debug_log(f"Barcode files saved:\n- {train_barcodes_path}\n- {test_barcodes_path}")
+    with open(train_barcodes_path, "w") as f:
+        f.write("\n".join(train_barcodes))
+
+    with open(test_barcodes_path, "w") as f:
+        f.write("\n".join(test_barcodes))
+
+    with open(holdout_barcodes_path, "w") as f:
+        f.write("\n".join(holdout_barcodes))
+
+    debug_log(
+        "Barcode files saved:\n"
+        f"- {train_barcodes_path}\n"
+        f"- {test_barcodes_path}\n"
+        f"- {holdout_barcodes_path}"
+    )
 
     # Cache only tokenized gene sequences
-    # Keep tokenized genes and labels when caching
-    cols_to_keep = [c for c in tokenized_train_set.column_names if c not in ['gene_names', 'gene_expressions']]
+    # Remove raw gene inputs before saving
+    cols_to_keep = [
+        c for c in tokenized_train_set.column_names
+        if c not in ["gene_names", "gene_expressions"]
+    ]
+
     tokenized_train_set = tokenized_train_set.select_columns(cols_to_keep)
     tokenized_test_set  = tokenized_test_set.select_columns(cols_to_keep)
 
+    train_cache_path = None
+    test_cache_path  = None
 
     if use_cache:
         debug_log("Saving tokenized datasets to disk.")
-        train_cache_path = os.path.join(cache_prefix, 'train')
+        train_cache_path = os.path.join(cache_prefix, "train")
         tokenized_train_set.save_to_disk(train_cache_path)
-        test_cache_path = os.path.join(cache_prefix, 'test')
+
+        test_cache_path = os.path.join(cache_prefix, "test")
         tokenized_test_set.save_to_disk(test_cache_path)
 
     return train_cache_path, test_cache_path
+
 
 
 def preprocess(tokenizer, examples):
@@ -130,7 +156,7 @@ def create_and_cache_tokenized_dataset(debug=False, use_cache=True, tokenizer=No
     Steps:
       - Load matrix from CSV or .npz cache
       - Stream rows into Hugging Face dataset
-      - Split into train/test sets
+      - Split into train/test/holdout sets
       - Tokenize gene sequences per cell
       - Cache barcodes and datasets to disk
 
@@ -168,11 +194,15 @@ def create_and_cache_tokenized_dataset(debug=False, use_cache=True, tokenizer=No
             gene_names = data['gene_names']
         else:
             debug_log(f"Importing dataset from {input_file}")
-            if input_file.endswith('.gz'):
-                df = pd.read_csv(input_file, index_col=0, sep=r'[,\t]', engine='python', compression='gzip') # , dtype=np.float32
-            else:
-                df = pd.read_csv(input_file, index_col=0, sep=r'[,\t]', engine='python') # , dtype=np.float32
-    
+            #if input_file.endswith('.gz'):
+            #    df = pd.read_csv(input_file, index_col=0, sep=r'[,\t]', engine='python', compression='gzip') # , dtype=np.float32
+            #else:
+            #    df = pd.read_csv(input_file, index_col=0, sep=r'[,\t]', engine='python') # , dtype=np.float32
+            float_values = np.load('/workspace/PCformer/data/scRNA/Atlas_values.npz')['float_values']
+            index = np.load('/workspace/PCformer/data/scRNA/Atlas_index.npy', allow_pickle=True)
+            columns = np.load('/workspace/PCformer/data/scRNA/Atlas_columns.npy', allow_pickle=True)
+            df = pd.DataFrame(float_values, index=index, columns=columns)
+
             cell_barcodes = df.index.tolist()
         
             debug_log(f"Loaded the expression matrix with {len(cell_barcodes)} cells and {len(gene_names)} genes.")
@@ -188,10 +218,24 @@ def create_and_cache_tokenized_dataset(debug=False, use_cache=True, tokenizer=No
             del df
             gc.collect()
     
-        debug_log("Splitting the dataset.")
-        dataset = Dataset.from_generator(
+        debug_log("Splitting the dataset into train/test/holdout (80/10/10).")
+        
+        full = Dataset.from_generator(
             lambda: generate_dataset_rows(cell_barcodes, gene_expressions, gene_names)
-        ).train_test_split(test_size=0.1, seed=42)
+        )
+        
+        # 80/20 first
+        train_temp = full.train_test_split(test_size=0.20, seed=42)
+        
+        # split the 20% evenly => 10% test, 10% holdout
+        test_holdout = train_temp["test"].train_test_split(test_size=0.5, seed=42)
+        
+        dataset = {
+            "train": train_temp["train"],
+            "test": test_holdout["train"],
+            "holdout": test_holdout["test"],
+        }
+
     
         del gene_expressions, cell_barcodes, gene_names
         gc.collect()
@@ -220,15 +264,22 @@ def create_and_cache_tokenized_dataset(debug=False, use_cache=True, tokenizer=No
         debug_log("Finished tokenization.")
 
         # Clean up raw columns after tokenization
-        for ds in [tokenized_train_set, tokenized_test_set]:
-            if 'tokenized_genes' not in ds.column_names:
-                raise ValueError("ERROR: `tokenized_genes` is missing after mapping.")
-            ds.remove_columns(['gene_names', 'gene_expressions'])
+        tokenized_train_set = tokenized_train_set.remove_columns(["gene_names", "gene_expressions"])
+        tokenized_test_set  = tokenized_test_set.remove_columns(["gene_names", "gene_expressions"])
+
 
         debug_log("Saving tokens to disk.")
+        
+        holdout_barcodes = [ex["barcode"] for ex in dataset["holdout"]]
+
         train_cache_file, test_cache_file = save_split_data(
-            cache_prefix, use_cache, tokenized_train_set, tokenized_test_set
+            cache_prefix,
+            use_cache,
+            tokenized_train_set,
+            tokenized_test_set,
+            holdout_barcodes
         )
+
     
         debug_log(f"Datasets cached: {train_cache_file}, {test_cache_file}.")
         del dataset
@@ -280,4 +331,3 @@ if __name__ == "__main__":
     log_file = initialize_logging(prefix, context="tokenize")
 
     start_loop(debug=config['debug'], use_cache=config['use_cache'])
-
