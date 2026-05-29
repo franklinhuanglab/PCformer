@@ -18,7 +18,7 @@ TOTAL_CPUS=$(nproc --all)
 # USER MODIFIED VARIABLES
 CPUS=8  # Or: $((TOTAL_CPUS - 2)); HPC: $NSLOTS
 
-MODALITY="Atlas"                          # MODIFY. Where the input files live in `data`
+MODALITY="scRNA"                          # MODIFY. Where the input files live in `data`
 MATRIX_FILE="Atlas_1pct_matrix.csv.gz"    # MODIFY. Input expression matrix
 MODEL_NAME="pc_atlas"                     # MODIFY. Name of the fine-tuned model
 METADATA="Atlas_1pct_metadata.csv"        # Model labels, not from new inf dataset

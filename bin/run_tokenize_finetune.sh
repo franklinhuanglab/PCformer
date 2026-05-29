@@ -18,7 +18,7 @@ TOTAL_CPUS=$(nproc --all)
 # USER MODIFIED VARIABLES
 CPUS=16  # Or: $((TOTAL_CPUS - 2)); HPC: $NSLOTS
 
-MODALITY="Atlas"
+MODALITY="scRNA"
 MATRIX_FILE="Atlas_1pct_matrix.csv.gz"
 MODEL_NAME="pc_atlas"
 METADATA="Atlas_1pct_metadata.csv"
