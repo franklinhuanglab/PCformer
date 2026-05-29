@@ -1,0 +1,15 @@
+anndata
+datasets
+matplotlib
+numpy
+pandas
+psutil
+pyarrow
+pyyaml
+scanpy
+scikit-learn
+seaborn
+torch
+tqdm
+tensorboard
+transformers

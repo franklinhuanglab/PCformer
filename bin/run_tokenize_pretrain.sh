@@ -18,13 +18,12 @@ TOTAL_CPUS=$(nproc --all)
 # USER MODIFIED VARIABLES
 CPUS=16  # Or: $((TOTAL_CPUS - 2)); HPC: $NSLOTS
 
-MODALITY="Xenium"
-MATRIX_FILE="Xenium_AA_5pct_matrix.csv.gz"
-MODEL_NAME="xenium_aa_5pct"
-METADATA="Xenium_AA_5pct_metadata.csv"
-GENES="gene_names_xenium.txt"
+MODALITY="Atlas"
+MATRIX_FILE="Atlas_1pct_matrix.csv.gz"
+MODEL_NAME="pc_atlas"
+METADATA="Atlas_1pct_metadata.csv"
+GENES="gene_names"
 STAGE="pretrain"
-
 
 INPUT_DIR="${PROJECT_ROOT}/data/${MODALITY}"
 CACHE_DIR="${PROJECT_ROOT}/cache"
@@ -33,7 +32,6 @@ CONFIG_FILE="${PROJECT_ROOT}/config.yaml"
 DATA_MATRIX="${INPUT_DIR}/${MATRIX_FILE}"
 GENE_NAMES_FILE="${INPUT_DIR}/${GENES}"
 CACHE_PREFIX="${CACHE_DIR}/${STAGE}/${MODEL_NAME}"   # $(date +%Y%m%d_%H%M%S)"
-
 
 # ----------------------------------------------------------------------------------------
 # ENVIRONMENT SETUP
@@ -48,13 +46,6 @@ setup_environment() {
     #module load cuda/11.8
     #module load cuda/12.2
     #source venv/bin/activate
-}
-
-disable_huggingface_cache() {
-    echo "Disabling Hugging Face datasets cache..."
-    # Choose only one of these
-    export HF_DATASETS_CACHE=None
-    export HF_DATASETS_CACHE=""
 }
 
 prepare_directories() {
@@ -74,11 +65,8 @@ show_inputs_summary() {
 
 show_inputs_summary
 print_cpu_info
-#print_gpu_info
 prepare_directories
 #setup_environment
-#disable_huggingface_cache
-
 
 # ----------------------------------------------------------------------------------------
 # RUN THE SCRIPT
@@ -89,4 +77,3 @@ python -m src.preprocess.tokenize_pretrain \
     "${CACHE_PREFIX}" \
     "${CONFIG_FILE}" \
     "${CPUS}"
-

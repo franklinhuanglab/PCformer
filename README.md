@@ -1,12 +1,11 @@
 **PCformer**
-=====================
+============
 `Transformer model for the annotation of prostate cell types from ranked-value single-cell and single-nucleus RNA, ATAC, Xenium, and Visium data.` 
 
 Prostate cancer (PCa) shows strong heterogeneity in gene expression, making tumor cell annotation difficult. Current single-cell annotation methods rely on non-standardized approaches, often leading to inconsistent results. To address this, we developed a deep learning transformer model that standardizes the annotation of PCa cells. The architecture builds on a single-cell RNA foundation model trained on 560,492 cells and 13,745 genes from the PCa Atlas. This foundation model learns cell type specific gene expression patterns, which are then fine-tuned for the classification of prostate cell in new data.
 
 **DATASETS**
---------
----
+------------
 
 **> Prostate single-cell RNA-seq matrix**
 
@@ -38,8 +37,7 @@ Format
 
 
 **HOW TO RUN PCFormer**
-------------
-____________
+-----------------------
 
 ### Installation
 
@@ -114,14 +112,12 @@ The hold-out dataset is created during `tokenize_pretrain.py`, excluded during f
 
 **WORKFLOW**
 ------------
-____________
 
 ![INK](images/transformer_schematic_v3.png)
 
 
 **Pre-processing the Corpus Data for Pre-training**
 ---------------------------------------------------
-______________________________________________
 
 Script: `tokenize_pretrain.py`
 
@@ -160,8 +156,7 @@ Output:
 
 
 **Pre-training the Foundation Model**
-------------------------------------
-_____________________________________
+-------------------------------------
 
 Script: `pretrain.py`
 
@@ -187,7 +182,6 @@ Output:
 
 **Pre-processing the Corpus Data for Fine-tuning**
 --------------------------------------------------
-___________________________________
 
 Script: `tokenize_finetune.py`
 
@@ -228,8 +222,7 @@ Output:
 
 
 **Fine-tuning Task for Cell Type Classification**
-------------------------------------------------
-________________________________________________
+-------------------------------------------------
 
 Script: `finetune.py` 
 
@@ -259,7 +252,6 @@ Output:
 
 **Inference**
 -------------
-_____________
 
 Script: `inference.py`
 
@@ -292,8 +284,7 @@ Output:
  - **< OUTPUT_PREFIX >.csv** (_csv_): The predicted labels for each cell in the input matrix. CellName,PredictedLabel,Confidence
 
 **Project Structure and Data Transfer**
-------------------
----
+---------------------------------------
 
 The updated source code will live in [https://github.com/franklinhuanglab/PCformer.git](https://github.com/franklinhuanglab/PCformer.git). 
 Each user will clone this repo into a rented Vast.ai machine each time they plan to use the transformer architecture.

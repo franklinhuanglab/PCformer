@@ -18,14 +18,13 @@ TOTAL_CPUS=$(nproc --all)
 # USER MODIFIED VARIABLES
 CPUS=16  # Or: $((TOTAL_CPUS - 2)); HPC: $NSLOTS
 
-MODALITY="Xenium"
-MATRIX_FILE="Xenium_AA_5pct_matrix.csv.gz"
-MODEL_NAME="xenium_aa_5pct"
-METADATA="Xenium_AA_5pct_metadata.csv"
-GENES="gene_names_xenium.txt"
+MODALITY="Atlas"
+MATRIX_FILE="Atlas_1pct_matrix.csv.gz"
+MODEL_NAME="pc_atlas"
+METADATA="Atlas_1pct_metadata.csv"
+GENES="gene_names"
 STAGE="finetune"
 EMBED_DIM=1024          # Options: 512 1024 2048
-
 
 INPUT_DIR="${PROJECT_ROOT}/data/${MODALITY}"
 CACHE_DIR="${PROJECT_ROOT}/cache"
@@ -52,13 +51,6 @@ setup_environment() {
     #source venv/bin/activate
 }
 
-disable_huggingface_cache() {
-    echo "Disabling Hugging Face datasets cache..."
-    # Choose only one of these
-    export HF_DATASETS_CACHE=None
-    export HF_DATASETS_CACHE=""
-}
-
 prepare_directories() {
     echo "Creating output and cache directories..."
     mkdir -p "${CACHE_DIR}"
@@ -77,10 +69,8 @@ show_inputs_summary() {
 
 show_inputs_summary
 print_cpu_info
-#print_gpu_info
 prepare_directories
 #setup_environment
-#disable_huggingface_cache
 
 # ----------------------------------------------------------------------------------------
 # RUN THE SCRIPT

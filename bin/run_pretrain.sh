@@ -18,11 +18,11 @@ TOTAL_CPUS=$(nproc --all)
 # USER MODIFIED VARIABLES
 CPUS=2  # Or: $((TOTAL_CPUS - 2)); HPC: $NSLOTS
 
-MODALITY="Xenium"
-MATRIX_FILE="Xenium_AA_5pct_matrix.csv.gz"
-MODEL_NAME="xenium_aa_5pct"
-METADATA="Xenium_AA_5pct_metadata.csv"
-GENES="gene_names_xenium.txt"
+MODALITY="Atlas"
+MATRIX_FILE="Atlas_1pct_matrix.csv.gz"
+MODEL_NAME="pc_atlas"
+METADATA="Atlas_1pct_metadata.csv"
+GENES="gene_names"
 STAGE="pretrain"
 EMBED_DIM=1024          # Options: 512 1024 2048
 
@@ -34,7 +34,6 @@ DATA_MATRIX="${INPUT_DIR}/${MATRIX_FILE}"
 GENE_NAMES_FILE="${INPUT_DIR}/${GENES}"
 CACHE_PREFIX="${CACHE_DIR}/${STAGE}/${MODEL_NAME}" # _embed_${EMBED_DIM}"   # $(date +%Y%m%d_%H%M%S)"
 OUTPUT="$PROJECT_ROOT/model_weights/${STAGE}/${MODEL_NAME}/embed_${EMBED_DIM}/${MODEL_NAME}_${EMBED_DIM}_ranked_model"           # Script adds `.pt` to weights file
-
 
 # ----------------------------------------------------------------------------------------
 # ENVIRONMENT SETUP
@@ -70,13 +69,6 @@ setup_environment() {
     #source venv/bin/activate
 }
 
-disable_huggingface_cache() {
-    echo "Disabling Hugging Face datasets cache..."
-    # Choose only one of these
-    export HF_DATASETS_CACHE=None
-    export HF_DATASETS_CACHE=""
-}
-
 prepare_directories() {
     echo "Creating output and cache directories..."
     mkdir -p "${CACHE_DIR}"
@@ -99,8 +91,6 @@ print_cpu_info
 print_gpu_info
 prepare_directories
 #setup_environment
-#disable_huggingface_cache
-
 
 # ----------------------------------------------------------------------------------------
 # RUN THE SCRIPT
@@ -112,4 +102,3 @@ python -m src.training.pretrain \
     "${CONFIG_FILE}" \
     "${OUTPUT}" \
     "${CPUS}"
-

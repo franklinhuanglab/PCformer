@@ -2,31 +2,25 @@
 import numpy as np
 import pandas as pd
 import time
+np.random.seed(42)
+start = time.time()
 # ----------------------------------------------------------------------------------------
 # Description: Subset a matrix dataset to a fixed fraction of the rows.
 #              Filter Metadata file based on kept barcodes.
 # 
 # ----------------------------------------------------------------------------------------
-
-start = time.time()
-
-np.random.seed(42)
-
-# ----------------------------------------------------------------------------------------
 # USER MODIFIED VARIABLES
 data_prefix = '/home/data/scRNA/Atlas'
 
-pct = 0.05
-
+pct = 0.01
 
 # ----------------------------------------------------------------------------------------
 # DATA LOADING AND INITIALIZATIONS
 
 # First column (cell names) as index
 print("Importing dataset from: ", data_prefix)
-df = pd.read_csv(f'{data_prefix}_matrix.csv.gz', index_col=0, compression='gzip')
-md = pd.read_csv(f'{data_prefix}_metadata.tsv', index_col=0, sep='\t')
-
+df = pd.read_csv(f'{data_prefix}_Matrix.csv.gz', index_col=0, compression='gzip')
+md = pd.read_csv(f'{data_prefix}_Metadata.tsv', index_col=0, sep='\t')
 
 # ----------------------------------------------------------------------------------------
 # Compute N% of the dataset
@@ -52,7 +46,6 @@ print(subset_df.head())
 print("Saving subset dataset to: ", data_prefix)
 subset_df.to_csv(f'{data_prefix}_{int(pct*100)}pct_matrix.csv.gz', compression='gzip')
 
-
 print("Filtering metadata file.")
 md_filt = md.reindex(subset_df.index).reset_index()
 # If md was loded without specifying index col
@@ -61,6 +54,6 @@ md_filt = md.reindex(subset_df.index).reset_index()
 print("Saving metadata to: ", data_prefix)
 md_filt.to_csv(f'{data_prefix}_{int(pct*100)}pct_metadata.csv', index=False)
 
-
+# ----------------------------------------------------------------------------------------
 end = time.time()
 print(f"Hybrid NumPy-Pandas time: {end - start:.4f} seconds")  # ~0.08s
