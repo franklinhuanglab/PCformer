@@ -53,6 +53,7 @@ conda create --name pcformer python=3.12.12
 conda activate pcformer
 pip install -r requirements.txt
 
+cd bin
 ```
 
 ### Input file requirements
@@ -75,15 +76,27 @@ Note: Metadata barcodes must match matrix row names
 │   └── run_inf.sh                 -> Run inference on hold-out or new datasets
 ```
 
+
 ### Script execution order
 
 ```bash
+# Run as an SGE submission script
+qsub run_tokenize_pretrain.sh
+qsub run_pretrain.sh
+qsub run_tokenize_finetune.sh
+qsub run_finetune.sh
+qsub run_inf.sh
+```
+
+```bash
+# Or, run interactively from the command line
 bash run_tokenize_pretrain.sh
 bash run_pretrain.sh
 bash run_tokenize_finetune.sh
 bash run_finetune.sh
 bash run_inf.sh
 ```
+
 
 ### Script configuration
 
@@ -290,6 +303,12 @@ Input:
 
 Output:
  - **< OUTPUT_PREFIX >.csv** (_csv_): The predicted labels for each cell in the input matrix. CellName,PredictedLabel,Confidence
+
+
+**Citation**
+-------------
+If you use PCFormer in your research, please cite:
+> Song H, Xu J, Velazquez-Arcelay K, Demirci A, Raizenne BL, Hsu SC, Choi J, Pham JH, Chen Y, Weinstein HNW, Salzman I, Tsui M, Akutagawa J, Adingo W, Goldschmidt E, Carroll PR, Hong JC, Heaphy CM, Cooperberg MR, Greenland N, Campbell JD, Huang FW. A single-cell and spatial atlas of prostate cancer reveals the combinatorial nature of gene modules underlying lineage plasticity and metastasis. bioRxiv, 2026. https://www.biorxiv.org/content/10.64898/2026.03.25.711335
 
 
 # <pre lang="markdown">
