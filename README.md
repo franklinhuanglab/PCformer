@@ -291,11 +291,6 @@ Input:
 Output:
  - **< OUTPUT_PREFIX >.csv** (_csv_): The predicted labels for each cell in the input matrix. CellName,PredictedLabel,Confidence
 
-**Project Structure and Data Transfer**
----------------------------------------
-
-The updated source code will live in [https://github.com/franklinhuanglab/PCformer.git](https://github.com/franklinhuanglab/PCformer.git). 
-Each user will clone this repo into a rented Vast.ai machine each time they plan to use the transformer architecture.
 
 # <pre lang="markdown">
 ## Directory Tree
