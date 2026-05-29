@@ -1,8 +1,13 @@
 **PCformer**
 ============
-`Transformer model for the annotation of prostate cell types from ranked-value single-cell and single-nucleus RNA, ATAC, Xenium, and Visium data.` 
+`Transformer foundation model for ranked-value prostate single-cell and single-nucleus omics data.` 
 
-Prostate cancer (PCa) shows strong heterogeneity in gene expression, making tumor cell annotation difficult. Current single-cell annotation methods rely on non-standardized approaches, often leading to inconsistent results. To address this, we developed a deep learning transformer model that standardizes the annotation of PCa cells. The architecture builds on a single-cell RNA foundation model trained on 560,492 cells and 13,745 genes from the PCa Atlas. This foundation model learns cell type specific gene expression patterns, which are then fine-tuned for the classification of prostate cell in new data.
+PCformer is a transformer model for the annotation of prostate cell types from ranked-value single-cell and single-nucleus RNA sequencing data, with extensions to ATAC, Xenium, and Visium datasets.
+
+The prostate contains a diversity of epithelial, stromal, endothelial, and immune cell populations whose transcriptional states vary across normal and disease conditions. Accurate annotation of these cell types is often challenging and can depend on dataset specific approaches and manual curation. PCformer addresses this challenge by providing a standardized deep learning framework for prostate cell annotation.
+
+The foundation model was developed using 560,492 prostate cells spanning 13,745 genes from the Prostate Cancer Atlas. Through transformer representation learning, PCformer captures gene expression patterns by cell type and can be fine-tuned for downstream classification tasks, including cell type annotation in independent prostate datasets.
+
 
 **DATASETS**
 ------------
@@ -20,8 +25,8 @@ Format
 **> Metadata**
 |         |           |      | Cell Type Classes |          |           |
 |---------|-----------|--------|---------------|------------|-----------|
-| Basal   | Bcell     | Club   | Endothelial   | Fibroblast | Mast_cell | 
-| Myeloid | Non_Tumor | Plasma | Smooth_Muscle | Tcell      | Tumor     |
+| Basal   | Bcell     | Club   | Endothelial   | Fibroblast | Luminal   |
+| Mast    |  Myeloid  | Plasma | Smooth_Muscle | Tcell      | Tumor     |
 |  |  |  |  |  |  |  
 
 Format
@@ -36,7 +41,7 @@ Format
 
 
 
-**HOW TO RUN PCFormer**
+**HOW TO RUN PCformer**
 -----------------------
 
 ### Installation
@@ -44,7 +49,10 @@ Format
 ```bash
 git clone https://github.com/franklinhuanglab/PCformer.git
 cd PCformer
+conda create --name pcformer python=3.12.12
+conda activate pcformer
 pip install -r requirements.txt
+
 ```
 
 ### Input file requirements
