@@ -22,7 +22,7 @@ MODALITY="scRNA"                          # MODIFY. Where the input files live i
 MATRIX_FILE="Atlas_1pct_matrix.csv.gz"    # MODIFY. Input expression matrix
 MODEL_NAME="pc_atlas"                     # MODIFY. Name of the fine-tuned model
 METADATA="Atlas_1pct_metadata.csv"        # Model labels, not from new inf dataset
-GENES="gene_names"                        # Gene vocabulary
+GENES="gene_names.txt"                        # Gene vocabulary
 STAGE="inference"
 EMBED_DIM=1024                            # Options: 512 1024 2048
 

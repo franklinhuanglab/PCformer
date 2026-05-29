@@ -22,7 +22,7 @@ MODALITY="scRNA"
 MATRIX_FILE="Atlas_1pct_matrix.csv.gz"
 MODEL_NAME="pc_atlas"
 METADATA="Atlas_1pct_metadata.csv"
-GENES="gene_names"
+GENES="gene_names.txt"
 STAGE="finetune"
 EMBED_DIM=1024          # Options: 512 1024 2048
 
